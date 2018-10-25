@@ -4,8 +4,10 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
+    "body-parser": "^1.18.3",
     "express": "^4.16.4",
-    "onoff": "^3.2.2"
+    "onoff": "^3.2.2",
+    "pug": "^2.0.3"
   },
   "devDependencies": {},
   "scripts": {
