@@ -1,0 +1,16 @@
+{
+  "name": "temp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "temp_1.js",
+  "dependencies": {
+    "blynk-library": "^0.5.3",
+    "node-dht-sensor": "^0.0.34",
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -29,7 +29,7 @@ application.post('/gpio/switch', (req, res) => {
         console.log('OFF');
     }
     else {
-        in.write(gpio.HIGH, () => {})
+        pin.write(gpio.HIGH, () => {})
         console.log('ON');
     }
     res.end();
