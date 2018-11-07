@@ -3,8 +3,8 @@
 import os
 import cv2
 import sys
-import json
 import magic
+import pickle
 
 mime = magic.Magic(mime = True)
 
@@ -34,8 +34,11 @@ print("* Embedding model has been loaded successfully")
 print("\n")
 
 
-database = {}
-user_idx = 0
+data = {
+    "embeddings": [],
+    "names": []
+}
+
 # Detect faces and compute embeddings with opencv dnn module
 for image_path in images:
     username = os.path.splitext(os.path.basename(image_path))[0]
@@ -72,19 +75,16 @@ for image_path in images:
         )
 
     embedding_model.setInput(face_blob)
-    user_embedding = embedding_model.forward()[0].tolist()
+    user_embedding = embedding_model.forward().flatten()
 
-    database[username] = {
-        "id": user_idx,
-        "embedding": user_embedding
-    }
+    data["embeddings"].append(user_embedding)
+    data["names"].append(username)
 
-    user_idx += 1
     print("Image processing done.")
     print("\n")
 
 
 embeddings_data_file_path = os.path.join(base_dir, 'embeddings')
-with open(embeddings_data_file_path, 'w') as embeddings_data_file:
-    embeddings_data_file.write(json.dumps(database, sort_keys = True, indent = 4))
+with open(embeddings_data_file_path, 'wb') as embeddings_data_file:
+    embeddings_data_file.write(pickle.dumps(data))
 
