@@ -41,7 +41,7 @@ data = {
 
 # Detect faces and compute embeddings with opencv dnn module
 for image_path in images:
-    username = os.path.splitext(os.path.basename(image_path))[0]
+    username = os.path.splitext(os.path.basename(image_path))[0].split('_')[0]
     # Detect faces on an image. It requires a grayscale image
     print("Image {} is being processed..".format(image_path))
     image = cv2.imread(image_path)
