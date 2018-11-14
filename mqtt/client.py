@@ -18,6 +18,12 @@ WEBCAM_SENSOR_TYPE = "webcam"
 INIT_TOPIC = "init_master"
 REQUEST_TOPIC = "dev_{}".format(CPU_SERIAL)
 RESPONSE_TOPIC = "be_{}".format(CPU_SERIAL)
+message_id = 0
+
+def get_message_id():
+    _id = message_id
+    message_id += 1
+    return _id
 
 def on_connect(client, userdata, flags, rc):
     if rc:
@@ -25,15 +31,18 @@ def on_connect(client, userdata, flags, rc):
         raise Exception("Bad connection")
 
     registration_data = {
-        "version": MQTT_PROTO_VERSION,
-        "name": "Face recognizer service",
-        "hw_id": CPU_SERIAL,
-        "actions": [],
-        "sensors": [{
-            "id": WEBCAM_SENSOR_ID,
-            "type": WEBCAM_SENSOR_TYPE,
-            "actions": ["webcam.recognize", "webcam.enable_auto", "webcam.disable_auto"]
-        }]
+        "mid": "REGISTER",
+        "payload": {
+            "version": MQTT_PROTO_VERSION,
+            "name": "Face recognizer service",
+            "hw_id": CPU_SERIAL,
+            "actions": [],
+            "sensors": [{
+                "id": WEBCAM_SENSOR_ID,
+                "type": WEBCAM_SENSOR_TYPE,
+                "actions": ["webcam.recognize", "webcam.enable_auto", "webcam.disable_auto"]
+            }]
+        }
     }
 
     client.publish(INIT_TOPIC, json.dumps(registration_data))
