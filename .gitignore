@@ -1,4 +1,8 @@
 node_modules
 *.swp
-
+3.4.3.zip
+opencv*
+openface
+face_recognition/models
+face_recognition/embeddings
 
