@@ -51,7 +51,7 @@ def message_handler(msg_type, msg_body):
         else:
             raise Exception("bad registration with the response message: {}".format(msg_body["status"]))
     else:
-        raise Exception("Unkown message type found: {}".format(msg_type)
+        raise Exception("unkown message type found: {}".format(msg_type)
 
 
 def on_connect_callback(client, userdata, flags, rc):
