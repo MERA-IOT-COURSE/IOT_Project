@@ -24,8 +24,8 @@ def get_raspberry_serial():
 
 MQTT_PROTO_VERSION = "1.0"
 CPU_SERIAL = get_raspberry_serial()
-WEBCAM_SENSOR_ID = "face_recogn_web"
-WEBCAM_SENSOR_TYPE = "webcam"
+WEBCAM_SENSOR_ID = "recogn_webcam"
+WEBCAM_SENSOR_TYPE = "sensor.webcam"
 INIT_TOPIC = "init_master"
 REQUEST_TOPIC = "dev_{}".format(CPU_SERIAL)
 RESPONSE_TOPIC = "be_{}".format(CPU_SERIAL)
@@ -73,7 +73,7 @@ def on_connect_callback(client, userdata, flags, rc):
                     "sensors": [{
                         "id": WEBCAM_SENSOR_ID,
                         "type": WEBCAM_SENSOR_TYPE,
-                        "actions": ["webcam.recognize", "webcam.enable_auto", "webcam.disable_auto"]
+                        "actions": ["common.read", "custom.enable_auto_read", "custom.disable_auto_read"]
                     }]
                 }
             }
