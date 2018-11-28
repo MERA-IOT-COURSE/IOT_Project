@@ -84,7 +84,7 @@ for image_path in images:
     print("\n")
 
 
-embeddings_data_file_path = os.path.join(base_dir, 'embeddings')
+embeddings_data_file_path = os.path.join(base_dir, 'models', 'embeddings')
 with open(embeddings_data_file_path, 'wb') as embeddings_data_file:
     embeddings_data_file.write(pickle.dumps(data))
 
