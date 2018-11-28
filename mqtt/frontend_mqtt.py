@@ -51,7 +51,7 @@ def message_handler(msg_type, msg_body):
         else:
             raise Exception("bad registration with the response message: {}".format(msg_body["status"]))
     else:
-        raise Exception("unkown message type found: {}".format(msg_type)
+        raise Exception("unkown message type found: {}".format(msg_type))
 
 
 def on_connect_callback(client, userdata, flags, rc):
@@ -93,7 +93,7 @@ def on_message_callback(client, userdata, msg):
     except json.JSONDecodeError:
         logger.error("a json message with a payload '{}' can't be decoded. It was ignored".format(msg.payload.decode('utf-8')))
         return
-    except Exception
+    except Exception:
         logger.exception("an exception occured during a message decoding with a payload: {}".format(str(msg.payload)), exc_info = True)
 
     logger.info("a message was received from the topic: '{}' with a payload: {}".format(msg.topic, msg.payload))
@@ -118,7 +118,7 @@ def on_message_callback(client, userdata, msg):
 def main_thread(client):
     registration_timeout = 5
     while not FLAGS["registered"]:
-        time.delay(0.1)
+        time.sleep(0.1)
         registration_timeout -= 0.1
         if registration_timeout < 0:
             logger.info("registration timeout. client is aborted")
