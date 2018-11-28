@@ -31,7 +31,6 @@ trained_svc = SVC(C=1.0, kernel="linear", probability=True)
 trained_svc.fit(embeddings_data["embeddings"], labels)
 print('\t\t- SVC training process has been done.')
 
-
 # Writing data to filesystem
 print('\t- Writing trained SVC to file system..')
 with open(trained_svc_path, 'wb') as trained_svc_file:
