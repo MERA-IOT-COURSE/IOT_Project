@@ -35,7 +35,7 @@ INIT_TOPIC = "init_master"
 REQUEST_TOPIC = "dev_{}".format(CPU_SERIAL)
 RESPONSE_TOPIC = "be_{}".format(CPU_SERIAL)
 
-MQTT_SERVER_HOST = "10.42.0.10"
+MQTT_SERVER_HOST = "10.42.0.111"
 MQTT_SERVER_PORT = 1883
 
 # Flag "auto" defines automatic sending data to server
@@ -70,7 +70,7 @@ logger.info("Face cascade classfifier has been loaded")
 
 def message_handler(msg_type, msg_body):
     if msg_type == "REGISTER_RESP":
-        if msg_body["status"] != "OK":
+        if msg_body["status"] == "OK":
             FLAGS["registered"] = True
         else:
             raise Exception("bad registration with the response message: {}".format(msg_body["status"]))
@@ -114,8 +114,9 @@ def on_connect_callback(client, userdata, flags, rc):
             }
         }
 
-        client.publish(INIT_TOPIC, json.dumps(register_body))
         client.subscribe(RESPONSE_TOPIC)
+        client.publish(INIT_TOPIC, json.dumps(register_body))
+        logger.info("subscribed to the topic: {}".format(RESPONSE_TOPIC))
     except Exception:
         logger.exception("an exception occured during a connection", exc_info = True)
         sys.exit(1)
