@@ -17,11 +17,6 @@ import subprocess
 from paho.mqtt import client as mqtt
 from frontend_logs import logger
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-l", "--listen", action="store_true")
-args = parser.parse_args()
-
-
 def get_raspberry_serial():
     command = "grep -Po '^Serial\s*:\s*\K[[:xdigit:]]{16}' /proc/cpuinfo"
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
@@ -38,8 +33,8 @@ INIT_TOPIC = "init_master"
 REQUEST_TOPIC = "dev_{}".format(CPU_SERIAL)
 RESPONSE_TOPIC = "be_{}".format(CPU_SERIAL)
 
-SERVER_HOST = "10.42.0.10"
-SERVER_PORT = 1883
+MQTT_SERVER_HOST = "10.42.0.10"
+MQTT_SERVER_PORT = 1883
 
 # Flag "auto" defines automatic sending data to server
 # Flag "registered" defines a successful registration
@@ -107,23 +102,20 @@ def on_connect_callback(client, userdata, flags, rc):
         if rc:
             raise Exception("the device didn't connect to a server. Code: {}".format(rc))
 
-        if args.listen:
-            client.subscribe('#')
-        else:
-            # There is a body for a client registration
-            register_body = {
-                "mid": "REGISTER",
-                "data": {
-                    "version": MQTT_PROTO_VERSION,
-                    "name": "Face detector service",
-                    "hw_id": CPU_SERIAL,
-                    "actions": DEV_ACTIONS,
-                    "sensors": SENSORS
-                }
+        # There is a body for a client registration
+        register_body = {
+            "mid": "REGISTER",
+            "data": {
+                "version": MQTT_PROTO_VERSION,
+                "name": "Face detector service",
+                "hw_id": CPU_SERIAL,
+                "actions": DEV_ACTIONS,
+                "sensors": SENSORS
             }
+        }
 
-            client.publish(INIT_TOPIC, json.dumps(register_body))
-            client.subscribe(RESPONSE_TOPIC)
+        client.publish(INIT_TOPIC, json.dumps(register_body))
+        client.subscribe(RESPONSE_TOPIC)
     except Exception:
         logger.exception("an exception occured during a connection", exc_info = True)
         sys.exit(1)
@@ -132,8 +124,7 @@ def on_connect_callback(client, userdata, flags, rc):
 def on_message_callback(client, userdata, msg):
     payload = None
     try:
-        # We try to get pretty json
-        payload = json.dumps(json.loads(msg.payload.decode('utf-8')), sort_keys = True, indent = 4)
+        payload = json.loads(msg.payload.decode('utf-8'))
     except json.JSONDecodeError:
         logger.error("a json message with a payload '{}' can't be decoded. It was ignored".format(msg.payload.decode('utf-8')))
         return
@@ -141,9 +132,6 @@ def on_message_callback(client, userdata, msg):
         logger.exception("an exception occured during a message decoding with a payload: {}".format(str(msg.payload)), exc_info = True)
 
     logger.info("a message was received from the topic: '{}' with a payload: {}".format(msg.topic, msg.payload))
-
-    if args.listen:
-        return
 
     msg_type = None
     msg_body = None
@@ -207,18 +195,12 @@ def main_thread(client):
 
 client = mqtt.Client()
 
-if args.listen:
-    logger.info('the client is running in a listen mode')
-else:
-    logger.info('the client is running in a publish mode')
+logger.info('the client is running in a publish mode')
 
 client.on_connect = on_connect_callback
 client.on_message = on_message_callback
-client.connect(SERVER_HOST, SERVER_PORT, 60)
+client.connect(MQTT_SERVER_HOST, MQTT_SERVER_PORT, 60)
 
-if args.listen:
-    client.loop_forever()
-else:
-    client.loop_start()
-    main_thread(client)
-    client.loop_stop()
+client.loop_start()
+main_thread(client)
+client.loop_stop()
