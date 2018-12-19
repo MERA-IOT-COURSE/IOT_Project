@@ -3,13 +3,15 @@
 '''
 TODO:
     * Registration delay
-
+    * To do: complete a registration
 '''
 
+import os
 import cv2
 import sys
 import json
 import time
+import base64
 import argparse
 import datetime
 import subprocess
@@ -39,7 +41,7 @@ MQTT_SERVER_PORT = 1883
 # Flag "auto" defines automatic sending data to server
 # Flag "registered" defines a successful registration
 FLAGS = {
-    "auto": False,
+    "auto": True,
     "registered": False
 }
 
@@ -63,8 +65,6 @@ CLASSIFIER_PATH = os.path.join(BASE_DIR, 'models', 'haarcascade_frontalface_defa
 
 logger.info("The device has been initialized. Loading the face cascade classifier..")
 classifier = cv2.CascadeClassifier(CLASSIFIER_PATH)
-capture = cv2.VideoCapture(0)
-capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 logger.info("Face cascade classfifier has been loaded")
 
 
@@ -136,7 +136,8 @@ def on_message_callback(client, userdata, msg):
     msg_type = None
     msg_body = None
     try:
-        msg_type = payload["msg"]
+        
+        msg_type = payload["mid"]
         msg_body = payload["data"]
         message_handler(msg_type, msg_body)
     except KeyError:
@@ -149,13 +150,14 @@ def on_message_callback(client, userdata, msg):
 
 def main_thread(client):
     registration_timeout = 5
-    while not FLAGS["registered"]:
+    while False:
         time.sleep(0.1)
         registration_timeout -= 0.1
         if registration_timeout < 0:
             logger.info("registration timeout. client is aborted")
             sys.exit(1)
 
+    capture = cv2.VideoCapture(0)
     while True:
         ret, frame = capture.read()
         if not ret:
@@ -171,7 +173,7 @@ def main_thread(client):
             gray,
             scaleFactor = 1.2,
             minNeighbors = 6,
-            minSize = (50, 50)
+            minSize = (75, 75)
         )
 
         cropped_faces = []
@@ -183,13 +185,16 @@ def main_thread(client):
             if not result:
                 logging.warning("jpeg encoding error")
 
-            cropped_faces.append(base64.b64encode(encimg.tobytes()))
+            cropped_faces.append(base64.b64encode(encimg.tobytes()).decode('utf-8'))
 
         if len(cropped_faces):
-            client.publish(RESPONSE_TOPIC, json.dumps({
-                "sensor_id": WEBCAM_SENSOR_ID,
-                "value": cropped_faces,
-                "ts": str(datetime.datetime.now())
+            client.publish(REQUEST_TOPIC, json.dumps({
+                "mid": "SENSOR_DATA",
+                "data": {
+                    "sensor_id": WEBCAM_SENSOR_ID,
+                    "value": cropped_faces,
+                    "ts": str(datetime.datetime.now())
+                }
             }))
             time.sleep(2)             
 
