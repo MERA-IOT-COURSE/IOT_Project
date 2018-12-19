@@ -150,7 +150,7 @@ def on_message_callback(client, userdata, msg):
 
 def main_thread(client):
     registration_timeout = 5
-    while False:
+    while not FLAGS["registered"]:
         time.sleep(0.1)
         registration_timeout -= 0.1
         if registration_timeout < 0:
